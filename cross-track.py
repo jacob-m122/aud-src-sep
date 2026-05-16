@@ -36,3 +36,10 @@ def forward(self, track_a, track_b):
     refined_signal = track_a - bleed_estimation
 
     return refined_signal
+
+class AntiArtifactModel(nn.module):
+    def __init__(self):
+        super(AntiArtifactModel, self).__init__()
+        self.encoder = nn.Sequential(nn.Conv2d(1, 16, 3), nn.ReLU())
+        self.attention = CrossTrackAttention(embed_dim=128)
+        self.decoder = nn.Sequential(nn.ConvTranspose2d(16, 1, 3), nn.Sigmoid())

@@ -2,8 +2,15 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader, Dataset
+import kagglehub
 
-import torchvision
+# Download latest version
+path = kagglehub.dataset_download("quanglvitlm/musdb18-hq")
+
+print("Path to dataset files:", path)
+
+
+
 
 class AudioStemDataset(Dataset):
     def __init__(self, file_paths, sample_rate=44100, n_fft=2048):
@@ -43,3 +50,6 @@ class AntiArtifactModel(nn.module):
         self.encoder = nn.Sequential(nn.Conv2d(1, 16, 3), nn.ReLU())
         self.attention = CrossTrackAttention(embed_dim=128)
         self.decoder = nn.Sequential(nn.ConvTranspose2d(16, 1, 3), nn.Sigmoid())
+    
+    def forward(self, x):
+        return x

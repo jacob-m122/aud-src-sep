@@ -29,5 +29,8 @@ def forward(self, track_a, track_b):
     attn_weights = torch.matmul(q, k.transpose(-2, -1)) / (q.size(-1) ** 0.5)
     soft_attn = F.softmax(attn_weights, dim=-1)
 
-    
-    
+    bleed_estimation = torch.matmul(soft_attn, v)
+
+    refined_signal = track_a - bleed_estimation
+
+    return refined_signal

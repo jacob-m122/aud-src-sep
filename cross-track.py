@@ -3,6 +3,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader, Dataset
 
+import torchvision
+
 class AudioStemDataset(Dataset):
     def __init__(self, file_paths, sample_rate=44100, n_fft=2048):
         self.file_paths = file_paths

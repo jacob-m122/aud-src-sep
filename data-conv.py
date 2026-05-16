@@ -40,6 +40,24 @@ class AudioPreprocessor:
         if waveform.shape[0] > 1:
             waveform = torch.mean(waveform, dim=0, keepdim=True)
 
+        complex_spec = self.stft(waveform)
+
+        mag_spec = torch.abs(complex_spec)
+
+        return mag_spec
+    
+    def mag_spec_to_wave(self, mag_spec, output_path):
+        
+        re_waveform = self.gl(mag_spec)
+
+        torchaudio.save(output_path, re_waveform, self.sample_rate)
+        print(f"Saved reconstructed audio to: {output_path}")
+
+if __name__ == "__main__":
+
+    preprocessor = AudioPreprocessor(sample_rate=44100, n_fft=2048, hop_length=512)
+
+
 
 
 

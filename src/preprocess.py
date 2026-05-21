@@ -48,3 +48,4 @@ class AudioPreprocessor:
 
 
         return mag_spec[:, :self.num_bins_to_keep, :]
+        # now sliced to the shape [1, 464, T]

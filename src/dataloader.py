@@ -5,10 +5,10 @@ from torch.utils.data import Dataset, DataLoader
 from preprocess import AudioPreprocessor
 
 class MedleyDbDataset(Dataset):
-    def __init__(self, dataset_root, segment_length=256, sample_rate=44100, n_fft=2048, hop_length=512):
+    def __init__(self, dataset_root, segment_length=256, sample_rate=44100, n_fft=2048, hop_length=512, max_freq=10000):
         self.dataset_root = dataset_root
         self.segment_length = segment_length
-        self.processor = AudioPreprocessor(sample_rate=sample_rate, n_fft=n_fft, hop_length=hop_length)
+        self.processor = AudioPreprocessor(sample_rate=sample_rate, n_fft=n_fft, hop_length=hop_length, max_freq=max_freq)
 
         
         self.track_pairs = self._build_dataset_index()

@@ -10,10 +10,10 @@ class MedleyDbDataset(Dataset):
         self.segment_length = segment_length
         self.processor = AudioPreprocessor(sample_rate=sample_rate, n_fft=n_fft, hop_length=hop_length)
 
-        # FIX: Call the exact method name defined below
+        
         self.track_pairs = self._build_dataset_index()
 
-    # FIX: Added leading underscore to match the __init__ call
+   
     def _build_dataset_index(self):
         pairs = []
 
@@ -24,7 +24,7 @@ class MedleyDbDataset(Dataset):
             if not os.path.exists(multitrack_dir):
                 continue
 
-            # FIX: Extension is .wav, not .wave
+            
             wav_files = glob.glob(os.path.join(multitrack_dir, "*.wav"))
 
             for i in range(len(wav_files) - 1):
@@ -35,7 +35,7 @@ class MedleyDbDataset(Dataset):
 
         if len(pairs) == 0:
             print("MedleyDB structure not found. Falling back to flat directory search...")
-            # FIX: Use recursive=True and **/*.wav so it finds files buried inside 'TestSong/Violet_Wave/'
+            
             search_pattern = os.path.join(self.dataset_root, "**", "*.wav")
             wav_files = sorted(glob.glob(search_pattern, recursive=True))
             
@@ -53,11 +53,11 @@ class MedleyDbDataset(Dataset):
     def __getitem__(self, id):
         pair = self.track_pairs[id]
 
-        # 1. Dynamically compute magnitude spectrograms on the fly
+        
         spec_a = self.processor.wav_to_magnitude_spectrogram(pair['primary_path'])
         spec_b = self.processor.wav_to_magnitude_spectrogram(pair['bleed_path'])
         
-        # 2. Slice to a fixed chunk size so PyTorch can batch them
+        
         if spec_a.shape[-1] > self.segment_length:
             max_start = spec_a.shape[-1] - self.segment_length
             start = torch.randint(0, max_start, (1,)).item()
@@ -73,7 +73,7 @@ class MedleyDbDataset(Dataset):
         return spec_a, spec_b
 
 
-# FIX: Proper Python main execution block syntax
+
 if __name__ == "__main__":
     DATASET_PATH = "./data/sample/TestSong"
 
@@ -81,16 +81,15 @@ if __name__ == "__main__":
         dataset = MedleyDbDataset(dataset_root=DATASET_PATH, segment_length=256)
         print(f"Total track pairs indexed: {len(dataset)}")
 
-        # FIX: Dataloader creation must be indented inside the IF block, otherwise it crashes if folder is missing.
-        # Note: num_workers=0 is safer for testing on local environments to prevent multiprocessing hangs.
+        
         dataloader = DataLoader(dataset, batch_size=4, shuffle=True, num_workers=0)
 
         for batch_id, (batch_track_a, batch_track_b) in enumerate(dataloader):
             print(f"Batch {batch_id} loaded successfully")
             
-            # FIX: Added .shape. Printing the raw tensor will flood the terminal with millions of numbers.
+            
             print(f"Track A batch shape: {batch_track_a.shape}")
             print(f"Track B batch shape: {batch_track_b.shape}")
-            break # Stop after one batch to prove the logic works
+            break
     else:
         print("Directory not found. Please verify the relative path.")

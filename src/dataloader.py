@@ -38,7 +38,7 @@ class MedleyDbDataset(Dataset):
             
             search_pattern = os.path.join(self.dataset_root, "**", "*.wav")
             wav_files = sorted(glob.glob(search_pattern, recursive=True))
-            
+        
             for i in range(len(wav_files) - 1):
                 pairs.append({
                     'primary_path': wav_files[i],

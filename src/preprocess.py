@@ -1,15 +1,20 @@
 import torch
 import torchaudio
 import torchaudio.transforms as T
-#from scipy.io import wavfile
+from scipy.io import wavfile
 import numpy as np
 
 class AudioPreprocessor:
-    def __init__(self, sample_rate = 44100, n_fft = 2048, hop_length = 512):
+    def __init__(self, sample_rate = 44100, n_fft = 2048, hop_length = 512, max_freq=10000):
         self.sample_rate = sample_rate
         self.n_fft = n_fft
         self.hop_length = hop_length
         self.win_length = n_fft
+
+        self.max_freq = max_freq
+
+        freq_res = sample_rate / n_fft
+        self.num_bins_to_keep = int(max_freq / freq_res)
 
         self.stft = T.Spectrogram(
             n_fft = self.n_fft,
@@ -40,4 +45,6 @@ class AudioPreprocessor:
 
         complex_spec = self.stft(waveform)
         mag_spec = torch.abs(complex_spec)
-        return mag_spec
+
+
+        return mag_spec[:, :self.num_bins_to_keep, :]

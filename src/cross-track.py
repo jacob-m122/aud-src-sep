@@ -55,5 +55,9 @@ class AntiArtifactModel(nn.Module):
         )
 
     
-    def forward(self, x):
-        return x
+
+    def forward(self, primary, reference):
+        enc_primary = self.encoder(primary)
+        enc_reference = self.encoder(reference)
+
+        B, C, F, T = enc_primary.shape

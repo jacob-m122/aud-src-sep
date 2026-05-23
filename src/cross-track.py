@@ -61,3 +61,19 @@ class AntiArtifactModel(nn.Module):
         enc_reference = self.encoder(reference)
 
         B, C, F, T = enc_primary.shape
+
+        flat_primary = enc_primary.view(B, C, F * T).permute(0, 2, 1)
+        flat_reference = enc_reference.view(B, C, F * T).permute(0, 2, 1)
+
+        proj_primary = self.feature_projection(flat_primary)
+        proj_reference = self.feature_projection(flat_reference)
+
+        attn_out = self.attention(proj_primary, proj_reference)
+
+        recon_flat = self.feature_reconstruction(attn_out)
+        recon_4d = recon_flat.permute(0, 2, 1).view(B, C, F, T)
+
+        output = self.decoder(recon_4d)
+
+        return F.relu(output)
+

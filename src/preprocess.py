@@ -16,7 +16,7 @@ class AudioPreprocessor:
         self.window = torch.hann_window(self.win_length)
 
     def wav_to_tensors(self, path):
-        """loads a wav file and return mono tensor"""
+        """loads a wav file and return a mono tensor"""
         sr, data = wavfile.read(path)
         waveform = torch.from_numpy(data.astype(np.float32)).T
 

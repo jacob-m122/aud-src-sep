@@ -7,16 +7,14 @@ from preprocess import AudioPreprocessor
 class MedleyDbDataset(Dataset):
     def __init__(self, dataset_root, segment_length=256, sample_rate=44100, n_fft=2048, hop_length=512):
         self.dataset_root = dataset_root
-
         self.segment_samples = segment_length * hop_length
         self.processor = AudioPreprocessor(sample_rate=sample_rate, n_fft=n_fft, hop_length=hop_length)
-
         self.track_pairs = self._build_dataset_index()
 
    
     def _build_dataset_index(self):
         pairs = []
-        # --- Your existing folder-walking logic ---
+        
         song_folders = [f.path for f in os.scandir(self.dataset_root) if f.is_dir()]
 
         for song_dir in song_folders:

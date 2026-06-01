@@ -22,40 +22,42 @@ class CrossTrackAttention(nn.Module):
         self.key = nn.Linear(embed_dim, embed_dim)
         self.value = nn.Linear(embed_dim, embed_dim)
 
-def forward(self, track_a, track_b):
-    q = self.query(track_a)
-    k = self.key(track_b)
-    v = self.value(track_b)
+    def forward(self, track_a, track_b):
+        q = self.query(track_a)
+        k = self.key(track_b)
+        v = self.value(track_b)
 
-    attn_weights = torch.matmul(q, k.transpose(-2, -1)) / (q.size(-1) ** 0.5)
-    soft_attn = F.softmax(attn_weights, dim=-1)
+        attn_weights = torch.matmul(q, k.transpose(-2, -1)) / (q.size(-1) ** 0.5)
+        soft_attn = F.softmax(attn_weights, dim=-1)
 
-    bleed_estimation = torch.matmul(soft_attn, v)
+        bleed_estimation = torch.matmul(soft_attn, v)
 
-    refined_signal = track_a - bleed_estimation
+        refined_signal = track_a - bleed_estimation
 
-    return refined_signal
+        return refined_signal
 
 class AntiArtifactModel(nn.Module):
     def __init__(self, embed_dim = 128):
         super(AntiArtifactModel, self).__init__()
 
-        self.encoder = nn.Sequential(nn.Conv2d(1, 16, 3), nn.ReLU())
-        self.attention = CrossTrackAttention(embed_dim=128)
-        self.decoder = nn.Sequential(nn.ConvTranspose2d(16, 1, 3), nn.Sigmoid())
-
-
-        self.feature_projection = nn.Linear(16, embed_dim)
+        #layer1: encoder
+        self.encoder = nn.Sequential(
+            nn.Conv2d(1, 16, 3, kernel_size=3, padding=1), 
+            nn.ReLU())
+        
+        #layer2: attention mechanism
         self.attention = CrossTrackAttention(embed_dim=embed_dim)
-        self.feature_reconstruction = nn.Linear(16, embed_dim)
+        self.feature_projection = nn.Linear(16, embed_dim)
+        self.feature_reconstruction = nn.Linear(embed_dim, 16)
 
+        #layer3: decoder
         self.decoder = nn.Sequential(
-            nn.ConvTranspose2d(16, 1, kernel_size=3, padding=1)
+            nn.ConvTranspose2d(16, 1, kernel_size=3, padding=1),
+            nn.Sigmoid()
         
         )
 
     
-
     def forward(self, primary, reference):
         enc_primary = self.encoder(primary)
         enc_reference = self.encoder(reference)
@@ -74,6 +76,6 @@ class AntiArtifactModel(nn.Module):
         recon_4d = recon_flat.permute(0, 2, 1).view(B, C, F, T)
 
         output = self.decoder(recon_4d)
-
         return F.relu(output)
+        #spectrogram output cannot be negative*
 

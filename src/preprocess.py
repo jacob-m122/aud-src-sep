@@ -15,14 +15,6 @@ class AudioPreprocessor:
         self.num_bins_to_keep = int(max_freq / freq_res)
         self.window = torch.hann_window(self.win_length)
 
-        self.stft = T.Spectrogram(
-            n_fft = self.n_fft,
-            win_length = self.win_length,
-            hop_length = self.hop_length,
-            power = None,
-            normalized = True
-        )
-
     def wav_to_tensors(self, path):
         """loads a wav file and return mono tensor"""
         sr, data = wavfile.read(path)

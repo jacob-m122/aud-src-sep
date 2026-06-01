@@ -76,6 +76,5 @@ class AntiArtifactModel(nn.Module):
         recon_4d = recon_flat.permute(0, 2, 1).view(B, C, F, T)
 
         output = self.decoder(recon_4d)
-        return F.relu(output)
-        #spectrogram output cannot be negative*
+        return output
 

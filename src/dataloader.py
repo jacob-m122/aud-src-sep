@@ -2,6 +2,7 @@ import glob
 import torch
 import os
 from torch.utils.data import Dataset, DataLoader
+import itertools
 from preprocess import AudioPreprocessor
 
 class MedleyDbDataset(Dataset):
@@ -14,22 +15,25 @@ class MedleyDbDataset(Dataset):
    
     def _build_dataset_index(self):
         pairs = []
-        
+
         song_folders = [f.path for f in os.scandir(self.dataset_root) if f.is_dir()]
 
+        stems = ['vocals.wav', 'drums.wav', 'bass.wav', 'other.wav']
+        
         for song_dir in song_folders:
-            multitrack_dir = os.path.join(song_dir, f"{os.path.basename(song_dir)}_MULTITRACKS")
-            if not os.path.exists(multitrack_dir):
-                continue
+            for primary_stem, bleed_stem in itertools.permutations(stems, 2):
+                primary_path = os.path.join(song_dir, primary_stem)
+                bleed_path = os.path.join(song_dir, bleed_stem)
 
-            # Ensure consistent pairing by sorting the files
-            wav_files = sorted(glob.glob(os.path.join(multitrack_dir, "*.wav")))
+                if os.path.exists(primary_path) and os.path.exists(bleed_path):
+                    pairs.append({
+                        'primary_path': primary_path,
+                        'bleed_path': bleed_path
+                    })
 
-            for i in range(len(wav_files) - 1):
-                pairs.append({
-                    'primary_path': wav_files[i],
-                    'bleed_path': wav_files[i+1]
-                })
+        if len(pairs) == 0:
+            print("error: no track pairs found.")
+
         return pairs
     
     def _augment_waveform(self, primary_wav, reference_wav):

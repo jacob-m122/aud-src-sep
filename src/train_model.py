@@ -68,12 +68,12 @@ def validate_and_evaluate(model, val_dataloader):
     sdr_metric.reset()
     si_sdr_metric.reset()
 
-def train_loop(model, dataloader, optimizer, criterion, epochs=50):
+def train_loop(model, train_dataloader, val_dataloader, optimizer, criterion, epochs=50):
     for epoch in range(epochs):
         model.train()
         train_loss = 0.0
 
-        for batch_id, (mag_artifacted, mag_reference, target_mask, _) in enumerate(dataloader):
+        for _, (mag_artifacted, mag_reference, target_mask, _) in enumerate(train_dataloader):
             mag_artifacted = mag_artifacted.to(device)
             mag_reference = mag_reference.to(device)
             target_mask = target_mask.to(device)
@@ -89,8 +89,8 @@ def train_loop(model, dataloader, optimizer, criterion, epochs=50):
 
             train_loss += loss.item()
 
-        print(f"Epoch {epoch+1}/{epochs} | Loss {train_loss/len(dataloader): .4f}")
-
+        print(f"Epoch {epoch+1}/{epochs} | Loss {train_loss/len(train_dataloader): .4f}")
+        
         if (epoch + 1) % 5 == 0:
             validate_and_evaluate(model, val_dataloader)
     

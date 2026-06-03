@@ -5,7 +5,7 @@ from torch.utils.data import Dataset, DataLoader
 import itertools
 from preprocess import AudioPreprocessor
 
-class MedleyDbDataset(Dataset):
+class MusdbDataset(Dataset):
     def __init__(self, dataset_root, segment_length=256, sample_rate=44100, n_fft=2048, hop_length=512):
         self.dataset_root = dataset_root
         self.segment_samples = segment_length * hop_length

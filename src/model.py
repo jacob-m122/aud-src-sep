@@ -44,7 +44,8 @@ class AntiArtifactModel(nn.Module):
         #layer1: encoder
         self.encoder = nn.Sequential(
             nn.Conv2d(1, 16, kernel_size=3, padding=1), 
-            nn.ReLU())
+            nn.ReLU()
+            )
         
         #layer2: attention mechanism
         self.attention = CrossTrackAttention(embed_dim=embed_dim)
@@ -65,16 +66,21 @@ class AntiArtifactModel(nn.Module):
 
         B, C, F, T = enc_primary.shape
 
-        flat_primary = enc_primary.view(B, C, F * T).permute(0, 2, 1)
-        flat_reference = enc_reference.view(B, C, F * T).permute(0, 2, 1)
+        flat_primary = enc_primary.permute(0, 2, 3, 1).contiguous().view(B * F, T, C)
+        flat_reference = enc_reference.permute(0, 2, 3, 1).contiguous().view(B, C, F * T)
 
+        #projection (16 -> 28)
         proj_primary = self.feature_projection(flat_primary)
         proj_reference = self.feature_projection(flat_reference)
 
+        # Attention calculation: T x T matrix (~257x257)
         attn_out = self.attention(proj_primary, proj_reference)
 
+        # Reconstruction (128 -> 16)
         recon_flat = self.feature_reconstruction(attn_out)
-        recon_4d = recon_flat.permute(0, 2, 1).view(B, C, F, T)
+
+        # Reshape back to 4D spectogram shape: [Batch, Channels, Freq, Time]
+        recon_4d = recon_flat.view(B, F, T, C).permute(0, 3, 1, 2).contiguous()
 
         output = self.decoder(recon_4d)
         return output

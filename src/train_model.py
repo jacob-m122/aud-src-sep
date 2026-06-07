@@ -17,7 +17,14 @@ val_dataset = MusdbDataset(dataset_root=VAL_PATH)
 train_dataloader = DataLoader(train_dataset, batch_size=8, shuffle=True)
 val_dataloader = DataLoader(val_dataset, batch_size=8, shuffle=False)
 
-device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
+#device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
+if torch.cuda.is_available():
+    device = torch.device("cuda")
+else:
+    device = torch.device("cpu")
+
+
+
 model = AntiArtifactModel(embed_dim=128).to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
 

@@ -45,6 +45,8 @@ def validate_and_evaluate(model, val_dataloader):
             mag_reference = mag_reference.to(device)
             complex_artifacted = complex_artifacted.to(device)
 
+            target_mask = target_mask.to(device)
+
             predicted_mask = model(mag_artifacted, mag_reference)
 
             processor = AudioPreprocessor(sample_rate=44100, n_fft=2048)

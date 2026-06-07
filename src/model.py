@@ -67,7 +67,7 @@ class AntiArtifactModel(nn.Module):
         B, C, F, T = enc_primary.shape
 
         flat_primary = enc_primary.permute(0, 2, 3, 1).contiguous().view(B * F, T, C)
-        flat_reference = enc_reference.permute(0, 2, 3, 1).contiguous().view(B, C, F * T)
+        flat_reference = enc_reference.permute(0, 2, 3, 1).contiguous().view(B * F, T, C)
 
         #projection (16 -> 28)
         proj_primary = self.feature_projection(flat_primary)

@@ -19,10 +19,10 @@ val_dataloader = DataLoader(val_dataset, batch_size=8, shuffle=False, num_worker
 
 if torch.cuda.is_available():
     device = torch.device("cuda")
-    gpu_name = torch.cuda.get_device_name(0)
-    print(f"accelerator found: {gpu_name} (via RocM)")
+    print(f"Colab gpu detected: {torch.cuda.get_device_name(0)} ")
 else:
-    print("could not find device.")
+    device = torch.device("cpu")
+    print("no gpu detected")
 
 
 #if torch.backends.mps.is_available():

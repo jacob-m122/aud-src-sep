@@ -14,8 +14,8 @@ VAL_PATH = "./data/musdb18_hq/test"
 train_dataset = MusdbDataset(dataset_root=TRAIN_PATH)
 val_dataset = MusdbDataset(dataset_root=VAL_PATH)
 
-train_dataloader = DataLoader(train_dataset, batch_size=8, shuffle=True, num_workers=4, pin_memory=True)
-val_dataloader = DataLoader(val_dataset, batch_size=8, shuffle=False, num_workers=4, pin_memory=True)
+train_dataloader = DataLoader(train_dataset, batch_size=8, shuffle=True, num_workers=1, pin_memory=True)
+val_dataloader = DataLoader(val_dataset, batch_size=8, shuffle=False, num_workers=1, pin_memory=True)
 
 if torch.cuda.is_available():
     device = torch.device("cuda")
@@ -65,9 +65,9 @@ def validate_and_evaluate(model, val_dataloader):
             complex_reference = processor.waveform_to_complex_stft(reference_wav)
             complex_clean = processor.waveform_to_complex_stft(clean_wav)
 
-            mag_artifacted = torch.abs(complex_artifacted)
-            mag_reference = torch.abs(complex_reference)
-            mag_clean = torch.abs(complex_clean)
+            mag_artifacted = torch.abs(complex_artifacted).unsqueeze(1)
+            mag_reference = torch.abs(complex_reference).unsqueeze(1)
+            mag_clean = torch.abs(complex_clean).unsqueeze(1)
             
             target_mask = torch.clamp(mag_clean / (mag_artifacted + 1e-8), 0.0, 1.0)
             predicted_mask = model(mag_artifacted, mag_reference)
@@ -108,9 +108,9 @@ def train_loop(model, train_dataloader, val_dataloader, optimizer, criterion, ep
             complex_reference = processor.waveform_to_complex_stft(reference_wav)
             complex_clean = processor.waveform_to_complex_stft(clean_wav)
 
-            mag_artifacted = torch.abs(complex_artifacted)
-            mag_reference = torch.abs(complex_reference)
-            mag_clean = torch.abs(complex_clean)
+            mag_artifacted = torch.abs(complex_artifacted).unsqueeze(1)
+            mag_reference = torch.abs(complex_reference).unsqueeze(1)
+            mag_clean = torch.abs(complex_clean).unsqueeze(1)
 
             # Generate target mask
             target_mask = torch.clamp(mag_clean / (mag_artifacted + 1e-8), 0.0, 1.0)

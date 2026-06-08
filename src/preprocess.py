@@ -34,6 +34,10 @@ class AudioPreprocessor:
     
     def waveform_to_complex_stft(self, waveform):
         """Convert waveform to complex STFT."""
+
+        if waveform.dim() == 3 and waveform.shape[1] == 1:
+            waveform = waveform.squeeze(1)
+
         complex_spec = torch.stft(
             waveform,
             n_fft=self.n_fft,
@@ -48,6 +52,10 @@ class AudioPreprocessor:
     def reconstruct_audio(self, original_complex_spec, soft_mask):
         """Applies the mask and reconstructs the audio via ISTFT"""
         # apply mask to complex spectrogram
+
+        if soft_mask.dim() == 4 and soft_mask.shape[1] == 1:
+            soft_mask = soft_mask.squeeze(1)
+            
         masked_spec = original_complex_spec * soft_mask
 
         # pad the frequency bins back to full size (n_fft // 2 + 1)

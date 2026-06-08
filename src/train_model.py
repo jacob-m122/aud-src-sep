@@ -14,8 +14,8 @@ VAL_PATH = "./data/musdb18_hq/test"
 train_dataset = MusdbDataset(dataset_root=TRAIN_PATH)
 val_dataset = MusdbDataset(dataset_root=VAL_PATH)
 
-train_dataloader = DataLoader(train_dataset, batch_size=8, shuffle=True, num_workers=1, pin_memory=True)
-val_dataloader = DataLoader(val_dataset, batch_size=8, shuffle=False, num_workers=1, pin_memory=True)
+train_dataloader = DataLoader(train_dataset, batch_size=32, shuffle=True, num_workers=1, pin_memory=True)
+val_dataloader = DataLoader(val_dataset, batch_size=32, shuffle=False, num_workers=1, pin_memory=True)
 
 if torch.cuda.is_available():
     device = torch.device("cuda")

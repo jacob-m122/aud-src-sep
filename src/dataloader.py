@@ -83,21 +83,8 @@ class MusdbDataset(Dataset):
         # generate corrupted input
         artifacted_primary_wav = self._augment_waveform(clean_primary_wav, reference_wav)
 
-        # convert to complex STFT
-        complex_artifacted = self.processor.waveform_to_complex_stft(artifacted_primary_wav)
-        complex_reference = self.processor.waveform_to_complex_stft(reference_wav)
-        complex_clean_target = self.processor.waveform_to_complex_stft(clean_primary_wav)
 
-        # extract magnitudes for model
-        mag_artifacted = torch.abs(complex_artifacted)
-        mag_reference = torch.abs(complex_reference)
-        mag_clean_target = torch.abs(complex_clean_target)
-
-        # return inputs (magnitudes) and the target mask (clean / corrupted ratio)
-        target_mask = mag_clean_target / (mag_artifacted + 1e-8)
-        target_mask = torch.clamp(target_mask, 0.0, 1.0)
-
-        return mag_artifacted, mag_reference, target_mask, complex_artifacted
+        return artifacted_primary_wav, reference_wav, clean_primary_wav
 
 
 #if __name__ == "__main__":

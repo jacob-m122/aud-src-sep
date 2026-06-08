@@ -14,21 +14,30 @@ VAL_PATH = "./data/musdb18_hq/test"
 train_dataset = MusdbDataset(dataset_root=TRAIN_PATH)
 val_dataset = MusdbDataset(dataset_root=VAL_PATH)
 
-train_dataloader = DataLoader(train_dataset, batch_size=8, shuffle=True)
-val_dataloader = DataLoader(val_dataset, batch_size=8, shuffle=False)
+train_dataloader = DataLoader(train_dataset, batch_size=8, shuffle=True, num_workers=4, pin_memory=True)
+val_dataloader = DataLoader(val_dataset, batch_size=8, shuffle=False, num_workers=4, pin_memory=True)
 
-#device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
 if torch.cuda.is_available():
     device = torch.device("cuda")
+    gpu_name = torch.cuda.get_device_name(0)
+    print(f"accelerator found: {gpu_name} (via RocM)")
 else:
-    device = torch.device("cpu")
+    print("could not find device.")
 
+
+#if torch.backends.mps.is_available():
+#    device = torch.device("mps")
+#elif torch.cuda.is_available():
+#    device = torch.device("cuda")
+#else:
+#    device = torch.device("cpu")
 
 
 model = AntiArtifactModel(embed_dim=128).to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
-
 criterion = nn.L1Loss()
+
+processor = AudioPreprocessor(sample_rate=44100, n_fft=2048)
 
 
 def calculate_lsd(mag_clean, mag_recon):
@@ -41,24 +50,29 @@ def calculate_lsd(mag_clean, mag_recon):
 
 def validate_and_evaluate(model, val_dataloader):
     model.eval()
-
     sdr_metric = SignalDistortionRatio().to(device)
     si_sdr_metric = ScaleInvariantSignalDistortionRatio().to(device)
     total_lsd = 0.0
 
     with torch.no_grad():
-        for mag_artifacted, mag_reference, target_mask, complex_artifacted in val_dataloader:
-            mag_artifacted = mag_artifacted.to(device)
-            mag_reference = mag_reference.to(device)
-            complex_artifacted = complex_artifacted.to(device)
+        for artifacted_wav, reference_wav, clean_wav in val_dataloader:
+            artifacted_wav = artifacted_wav.to(device)
+            reference_wav = reference_wav.to(device)
+            clean_wav = clean_wav.to(device)
 
-            target_mask = target_mask.to(device)
+            # Compute STFTs dynamically on the hardware accelerator
+            complex_artifacted = processor.waveform_to_complex_stft(artifacted_wav)
+            complex_reference = processor.waveform_to_complex_stft(reference_wav)
+            complex_clean = processor.waveform_to_complex_stft(clean_wav)
 
+            mag_artifacted = torch.abs(complex_artifacted)
+            mag_reference = torch.abs(complex_reference)
+            mag_clean = torch.abs(complex_clean)
+            
+            target_mask = torch.clamp(mag_clean / (mag_artifacted + 1e-8), 0.0, 1.0)
             predicted_mask = model(mag_artifacted, mag_reference)
 
-            processor = AudioPreprocessor(sample_rate=44100, n_fft=2048)
             recon_audio = processor.reconstruct_audio(complex_artifacted, predicted_mask)
-
             clean_audio = processor.reconstruct_audio(complex_artifacted, target_mask)
 
             #calculate SIR/SDR
@@ -83,17 +97,27 @@ def train_loop(model, train_dataloader, val_dataloader, optimizer, criterion, ep
         model.train()
         train_loss = 0.0
 
-        for _, (mag_artifacted, mag_reference, target_mask, _) in enumerate(train_dataloader):
-            mag_artifacted = mag_artifacted.to(device)
-            mag_reference = mag_reference.to(device)
-            target_mask = target_mask.to(device)
+        for _, (artifacted_wav, reference_wav, clean_wav) in enumerate(train_dataloader):
+
+            artifacted_wav = artifacted_wav.to(device)
+            reference_wav = reference_wav.to(device)
+            clean_wav = clean_wav.to(device)
+
+            # Perform STFT math ON THE ACCELERATOR
+            complex_artifacted = processor.waveform_to_complex_stft(artifacted_wav)
+            complex_reference = processor.waveform_to_complex_stft(reference_wav)
+            complex_clean = processor.waveform_to_complex_stft(clean_wav)
+
+            mag_artifacted = torch.abs(complex_artifacted)
+            mag_reference = torch.abs(complex_reference)
+            mag_clean = torch.abs(complex_clean)
+
+            # Generate target mask
+            target_mask = torch.clamp(mag_clean / (mag_artifacted + 1e-8), 0.0, 1.0)
 
             optimizer.zero_grad()
-
             predicted_mask = model(mag_artifacted, mag_reference)
-
             loss = criterion(predicted_mask, target_mask)
-
             loss.backward()
             optimizer.step()
 

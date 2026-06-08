@@ -72,7 +72,7 @@ def validate_and_evaluate(model, val_dataloader, criterion):
 
             recon_audio = processor.reconstruct_audio(complex_artifacted, predicted_mask)
             clean_audio = processor.reconstruct_audio(complex_artifacted, target_mask)
-
+            #dithering to prevent 
             safe_recon = recon_audio + 1e-7 * torch.randn_like(recon_audio)
             safe_clean = clean_audio + 1e-7 * torch.randn_like(clean_audio)
             #calculate SIR/SDR

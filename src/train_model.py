@@ -25,13 +25,6 @@ else:
     print("no gpu detected")
 
 
-#if torch.backends.mps.is_available():
-#    device = torch.device("mps")
-#elif torch.cuda.is_available():
-#    device = torch.device("cuda")
-#else:
-#    device = torch.device("cpu")
-
 
 model = AntiArtifactModel(embed_dim=128).to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
@@ -48,11 +41,13 @@ def calculate_lsd(mag_clean, mag_recon):
     lsd = torch.mean(torch.sqrt(torch.mean(diff,dim=1)))
     return lsd.item()
 
-def validate_and_evaluate(model, val_dataloader):
+def validate_and_evaluate(model, val_dataloader, criterion):
     model.eval()
     sdr_metric = SignalDistortionRatio().to(device)
     si_sdr_metric = ScaleInvariantSignalDistortionRatio().to(device)
     total_lsd = 0.0
+
+    total_val_loss = 0.0
 
     with torch.no_grad():
         for artifacted_wav, reference_wav, clean_wav in val_dataloader:
@@ -72,6 +67,9 @@ def validate_and_evaluate(model, val_dataloader):
             target_mask = torch.clamp(mag_clean / (mag_artifacted + 1e-8), 0.0, 1.0)
             predicted_mask = model(mag_artifacted, mag_reference)
 
+            loss = criterion(predicted_mask, target_mask)
+            total_val_loss += loss.item()
+
             recon_audio = processor.reconstruct_audio(complex_artifacted, predicted_mask)
             clean_audio = processor.reconstruct_audio(complex_artifacted, target_mask)
 
@@ -85,12 +83,14 @@ def validate_and_evaluate(model, val_dataloader):
 
             total_lsd += calculate_lsd(mag_clean_true, mag_recon)
 
+    print(f"Validation Loss: {total_val_loss / len(val_dataloader):.4f}")
     print(f"Validation SDR: {sdr_metric.compute():.2f} dB")
     print(f"Validation SI-SDR: {si_sdr_metric.compute():.2f} dB")
     print(f"Validation Mean LSD: {total_lsd / len(val_dataloader):.4f}")
 
     sdr_metric.reset()
     si_sdr_metric.reset()
+
 
 def train_loop(model, train_dataloader, val_dataloader, optimizer, criterion, epochs=50):
     for epoch in range(epochs):
@@ -129,7 +129,7 @@ def train_loop(model, train_dataloader, val_dataloader, optimizer, criterion, ep
         print(f"Epoch {epoch+1}/{epochs} | Loss {train_loss/len(train_dataloader): .4f}")
         
         if (epoch + 1) % 5 == 0:
-            validate_and_evaluate(model, val_dataloader)
+            validate_and_evaluate(model, val_dataloader, criterion)
     
 
 if __name__ == "__main__":

@@ -97,7 +97,7 @@ def train_loop(model, train_dataloader, val_dataloader, optimizer, criterion, ep
         model.train()
         train_loss = 0.0
 
-        for _, (artifacted_wav, reference_wav, clean_wav) in enumerate(train_dataloader):
+        for batch_id, (artifacted_wav, reference_wav, clean_wav) in enumerate(train_dataloader):
 
             artifacted_wav = artifacted_wav.to(device)
             reference_wav = reference_wav.to(device)
@@ -122,6 +122,9 @@ def train_loop(model, train_dataloader, val_dataloader, optimizer, criterion, ep
             optimizer.step()
 
             train_loss += loss.item()
+
+            if batch_id % 10 == 0:
+                print(f" -> Batch {batch_id}/{len(train_dataloader)} | Current Loss: {loss.item():.4f}")
 
         print(f"Epoch {epoch+1}/{epochs} | Loss {train_loss/len(train_dataloader): .4f}")
         

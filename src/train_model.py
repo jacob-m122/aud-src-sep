@@ -135,3 +135,8 @@ def train_loop(model, train_dataloader, val_dataloader, optimizer, criterion, ep
 if __name__ == "__main__":
 
     train_loop(model, train_dataloader, val_dataloader, optimizer, criterion)
+
+    print("Training complete. Saving model weights...")
+    save_path = '/content/drive/MyDrive/aud-src-sep/anti_artifact_model_final.pth'
+    torch.save(model.state_dict(), save_path)
+    print(f"Model successfully saved to: {save_path}")

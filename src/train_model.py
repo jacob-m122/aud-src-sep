@@ -94,7 +94,7 @@ def validate_and_evaluate(model, val_dataloader, criterion):
     si_sdr_metric.reset()
 
 
-def train_loop(model, train_dataloader, val_dataloader, optimizer, criterion, epochs=50):
+def train_loop(model, train_dataloader, val_dataloader, optimizer, criterion, epochs=10):
     for epoch in range(epochs):
         model.train()
         train_loss = 0.0

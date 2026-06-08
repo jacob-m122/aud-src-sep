@@ -73,9 +73,11 @@ def validate_and_evaluate(model, val_dataloader, criterion):
             recon_audio = processor.reconstruct_audio(complex_artifacted, predicted_mask)
             clean_audio = processor.reconstruct_audio(complex_artifacted, target_mask)
 
+            safe_recon = recon_audio + 1e-7 * torch.randn_like(recon_audio)
+            safe_clean = clean_audio + 1e-7 * torch.randn_like(clean_audio)
             #calculate SIR/SDR
-            sdr_metric.update(recon_audio, clean_audio)
-            si_sdr_metric.update(recon_audio, clean_audio)
+            sdr_metric.update(safe_recon, safe_clean)
+            si_sdr_metric.update(safe_recon, safe_clean)
 
             #calculate lsd
             mag_recon = torch.abs(processor.waveform_to_complex_stft(recon_audio)).to(device)

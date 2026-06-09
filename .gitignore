@@ -5,6 +5,3 @@ __pycache__/
 .ipynb_checkpoints/
 data/
 venv
-data.zip
-requirements.txt
-download_musdb.py

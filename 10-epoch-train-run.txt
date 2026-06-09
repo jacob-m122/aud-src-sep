@@ -1,0 +1,65 @@
+Colab gpu detected: NVIDIA A100-SXM4-80GB 
+ -> Batch 0/38 | Current Loss: 0.7170
+ -> Batch 10/38 | Current Loss: 0.1129
+ -> Batch 20/38 | Current Loss: 0.1183
+ -> Batch 30/38 | Current Loss: 0.0971
+Epoch 1/10 | Loss  0.1530
+ -> Batch 0/38 | Current Loss: 0.0883
+ -> Batch 10/38 | Current Loss: 0.0411
+ -> Batch 20/38 | Current Loss: 0.1322
+ -> Batch 30/38 | Current Loss: 0.0461
+Epoch 2/10 | Loss  0.0910
+ -> Batch 0/38 | Current Loss: 0.0735
+ -> Batch 10/38 | Current Loss: 0.1015
+ -> Batch 20/38 | Current Loss: 0.0593
+ -> Batch 30/38 | Current Loss: 0.0657
+Epoch 3/10 | Loss  0.0780
+ -> Batch 0/38 | Current Loss: 0.1121
+ -> Batch 10/38 | Current Loss: 0.1097
+ -> Batch 20/38 | Current Loss: 0.1671
+ -> Batch 30/38 | Current Loss: 0.1395
+Epoch 4/10 | Loss  0.0823
+ -> Batch 0/38 | Current Loss: 0.1254
+ -> Batch 10/38 | Current Loss: 0.0711
+ -> Batch 20/38 | Current Loss: 0.1117
+ -> Batch 30/38 | Current Loss: 0.1143
+Epoch 5/10 | Loss  0.0729
+/content/drive/MyDrive/aud-src-sep/src/preprocess.py:20: WavFileWarning: Chunk (non-data) not understood, skipping it.
+  sr, data = wavfile.read(path)
+Validation Loss: 0.1542
+Validation SDR: 56.63 dB
+Validation SI-SDR: 44.56 dB
+Validation Mean LSD: 40.2093
+ -> Batch 0/38 | Current Loss: 0.0342
+ -> Batch 10/38 | Current Loss: 0.1134
+ -> Batch 20/38 | Current Loss: 0.1311
+ -> Batch 30/38 | Current Loss: 0.1256
+Epoch 6/10 | Loss  0.0857
+ -> Batch 0/38 | Current Loss: 0.1820
+ -> Batch 10/38 | Current Loss: 0.0896
+ -> Batch 20/38 | Current Loss: 0.0799
+ -> Batch 30/38 | Current Loss: 0.1356
+Epoch 7/10 | Loss  0.0769
+ -> Batch 0/38 | Current Loss: 0.0991
+ -> Batch 10/38 | Current Loss: 0.0579
+ -> Batch 20/38 | Current Loss: 0.0907
+ -> Batch 30/38 | Current Loss: 0.0571
+Epoch 8/10 | Loss  0.0768
+ -> Batch 0/38 | Current Loss: 0.0197
+ -> Batch 10/38 | Current Loss: 0.0689
+ -> Batch 20/38 | Current Loss: 0.1136
+ -> Batch 30/38 | Current Loss: 0.1420
+Epoch 9/10 | Loss  0.0708
+ -> Batch 0/38 | Current Loss: 0.0663
+ -> Batch 10/38 | Current Loss: 0.1041
+ -> Batch 20/38 | Current Loss: 0.0510
+ -> Batch 30/38 | Current Loss: 0.1812
+Epoch 10/10 | Loss  0.0793
+/content/drive/MyDrive/aud-src-sep/src/preprocess.py:20: WavFileWarning: Chunk (non-data) not understood, skipping it.
+  sr, data = wavfile.read(path)
+Validation Loss: 0.1264
+Validation SDR: 63.55 dB
+Validation SI-SDR: 52.64 dB
+Validation Mean LSD: 37.3217
+Training complete. Saving model weights...
+Model successfully saved to: /content/drive/MyDrive/aud-src-sep/anti_artifact_model_final.pth

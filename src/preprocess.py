@@ -4,7 +4,7 @@ from scipy.io import wavfile
 import numpy as np
 
 class AudioPreprocessor:
-    def __init__(self, sample_rate = 44100, n_fft = 2048, hop_length = 512, max_freq=10000):
+    def __init__(self, sample_rate = 44100, n_fft = 2048, hop_length = 512, max_freq=20000):
         self.sample_rate = sample_rate
         self.n_fft = n_fft
         self.hop_length = hop_length

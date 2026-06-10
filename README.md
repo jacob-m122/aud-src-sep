@@ -61,7 +61,7 @@ Running the notebook generates side-by-side **Before & After Spectrograms** for 
 ## Paths to Data and Weights
 **Data Paths:**
 Due to GitHub file size limits, the MUSDB18-HQ dataset is not hosted in this repository. 
-* **Local/Kaggle:** The data can be downloaded locally via the Kaggle API (`fakhrealam9537/musdb18-hq`) using download_data.py.
+* **Local/Kaggle:** The data can be downloaded locally via the Kaggle API (`fakhrealam9537/musdb18-hq`) using 'download_data.py'.
 
 * **Talapas Cluster:** If evaluating on the Talapas cluster, update the path variables at the top of `src/train_model.py` to point to the shared MUSDB directory:
 

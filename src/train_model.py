@@ -14,8 +14,8 @@ VAL_PATH = "./data/musdb18_hq/test"
 train_dataset = MusdbDataset(dataset_root=TRAIN_PATH)
 val_dataset = MusdbDataset(dataset_root=VAL_PATH)
 
-train_dataloader = DataLoader(train_dataset, batch_size=32, shuffle=True, num_workers=1, pin_memory=True)
-val_dataloader = DataLoader(val_dataset, batch_size=32, shuffle=False, num_workers=1, pin_memory=True)
+train_dataloader = DataLoader(train_dataset, batch_size=32, shuffle=True, num_workers=2, pin_memory=True)
+val_dataloader = DataLoader(val_dataset, batch_size=32, shuffle=False, num_workers=2, pin_memory=True)
 
 if torch.cuda.is_available():
     device = torch.device("cuda")
@@ -31,7 +31,7 @@ model = AntiArtifactModel(embed_dim=128).to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
 criterion = nn.L1Loss()
 
-processor = AudioPreprocessor(sample_rate=44100, n_fft=2048)
+processor = AudioPreprocessor(sample_rate=44100, n_fft=2048, max_freq=10000)
 
 
 def calculate_lsd(mag_clean, mag_recon):

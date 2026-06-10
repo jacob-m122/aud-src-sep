@@ -1,7 +1,7 @@
 # Audio Stem Source Separation via Cross-Track Attention by Jacob Mitani
 
 ## Project Purpose
-In multi-track audio engineering, acoustic "bleed" (e.g., a vocal microphone picking up the snare drum) is a common issue faced by recording and mixing engineers. Traditional gating creates choppy audio, and standard EQ damages the primary signal's frequency spectrum.
+In multi-track audio engineering, acoustic "bleed" (e.g., a vocal microphone picking up the snare drum) is a common issue faced by recording and mixing engineers. Traditional gating creates choppy audio, and standard EQ damages the primary signal's frequency spectrum. This issue is particularly interesting to me primarily because I have encountered it naturally by learning to record songs in a home studio set-up (various instruments with bleed potential e.g. amplified electric guitar, bass guitar, drums, and vocals).
 
 This project implements a neural network architecture for source separation by means of a Cross-Track Attention Mechanism. The model is fed an artifacted target track and an isolated reference track (the bleed source), and the model computes a time-frequency attention matrix. This maps the structural image of the bleed onto the target track, and the network is thus able to subtract the artifact without degrading the primary instrument.
 

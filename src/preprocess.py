@@ -18,7 +18,13 @@ class AudioPreprocessor:
     def wav_to_tensors(self, path):
         """loads a wav file and return a mono tensor"""
         sr, data = wavfile.read(path)
-        waveform = torch.from_numpy(data.astype(np.float32)).T
+
+        if data.dtype == np.int16:
+            data = data.astype(np.float32) / 32768.0
+        else:
+            data = data.astype(np.float32)
+            
+        waveform = torch.from_numpy(data).T
 
         if waveform.dim() == 1:
             waveform = waveform.unsqueeze(0)

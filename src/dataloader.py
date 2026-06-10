@@ -37,26 +37,31 @@ class MusdbDataset(Dataset):
         return pairs
     
     def _augment_waveform(self, primary_wav, reference_wav):
-        """Injects synthetic artifacting: bleed, reflections, noise floor"""
-        #simulate mic bleed (10% to 30% of the reference signal
-        bleed_gain = torch.rand(1).item() * 0.2 + 0.1
-        bleed_signal = reference_wav * bleed_gain
+        # 1. Stochastic Mic Bleed (5% to 40% gain)
+        bleed_gain = torch.rand(1).item() * 0.35 + 0.05
+        # Randomly invert phase 50% of the time to prevent phase-memorization
+        phase_flip = -1.0 if torch.rand(1).item() > 0.5 else 1.0
+        bleed_signal = reference_wav * bleed_gain * phase_flip
 
-        #simulate room reflections (50ms delay with decay)
-        delay_samples = int(self.processor.sample_rate * 0.65)
-        decay_factor = 0.4
+        # 2. Stochastic Room Reflections
+        # Delay: Random between 10ms (0.01s) and 1000ms (1.0s)
+        delay_seconds = torch.rand(1).item() * 0.99 + 0.01
+        delay_samples = int(self.processor.sample_rate * delay_seconds)
+        
+        # Decay: Random between 10% and 60%
+        decay_factor = torch.rand(1).item() * 0.5 + 0.1
+        
         reflection = torch.zeros_like(primary_wav)
         if primary_wav.shape[-1] > delay_samples:
             reflection[:, delay_samples:] = primary_wav[:, :-delay_samples] * decay_factor
 
-        noise_floor = torch.randn_like(primary_wav) * 0.005
+        # 3. Stochastic Noise Floor (Varies from near-silent to noticeable analog hiss)
+        noise_level = torch.rand(1).item() * 0.009 + 0.001
+        noise_floor = torch.randn_like(primary_wav) * noise_level
 
+        # Combine
         artifacted_primary = primary_wav + bleed_signal + reflection + noise_floor
 
-        #clipping prevention
-        max_val = torch.max(torch.abs(artifacted_primary))
-        if max_val > 1.0:
-            artifacted_primary = artifacted_primary / max_val
         return artifacted_primary
 
     def __len__(self):
@@ -83,26 +88,11 @@ class MusdbDataset(Dataset):
         # generate corrupted input
         artifacted_primary_wav = self._augment_waveform(clean_primary_wav, reference_wav)
 
+        max_val = torch.max(torch.abs(artifacted_primary_wav))
+        if max_val > 1.0:
+            artifacted_primary_wav = artifacted_primary_wav / max_val
+            clean_primary_wav = clean_primary_wav / max_val
+            reference_wav = reference_wav / max_val
+
 
         return artifacted_primary_wav, reference_wav, clean_primary_wav
-
-
-#if __name__ == "__main__":
-#    DATASET_PATH = "./data/sample/TestSong"
-#
-#    if os.path.exists(DATASET_PATH):
-#        dataset = MedleyDbDataset(dataset_root=DATASET_PATH, segment_length=256)
-#        print(f"Total track pairs indexed: {len(dataset)}")
-#
-#        
-#        dataloader = DataLoader(dataset, batch_size=4, shuffle=True, num_workers=0)
-#
-#        for batch_id, (batch_track_a, batch_track_b) in enumerate(dataloader):
-#            print(f"Batch {batch_id} loaded successfully")
-#            
-#            
-#            print(f"Track A batch shape: {batch_track_a.shape}")
-#            print(f"Track B batch shape: {batch_track_b.shape}")
-#            break
-#    else:
-#        print("Directory not found. Please verify the relative path.")

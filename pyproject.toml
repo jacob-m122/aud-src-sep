@@ -5,10 +5,16 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "audio_separation_project"
 version = "0.1.0"
+description = "Audio Stem Source Separation via Cross-Track Attention"
 dependencies = [
     "torch",
     "torchaudio",
-    "scipy",
+    "torchmetrics",
+    "librosa",
     "matplotlib",
-    "jupyter"
+    "soundfile",
+    "scipy",
+    "numpy",
+    "jupyter",
+    "kaggle"
 ]

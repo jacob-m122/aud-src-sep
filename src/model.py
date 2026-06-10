@@ -1,4 +1,4 @@
-""""Implement cross-track attention logic"""
+""""model.py"""
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -73,13 +73,13 @@ class AntiArtifactModel(nn.Module):
         proj_primary = self.feature_projection(flat_primary)
         proj_reference = self.feature_projection(flat_reference)
 
-        # Attention calculation: T x T matrix (~257x257)
+        #attention calculation: T x T matrix (~257x257)
         attn_out = self.attention(proj_primary, proj_reference)
 
-        # Reconstruction (128 -> 16)
+        #reconstruction (128 -> 16)
         recon_flat = self.feature_reconstruction(attn_out)
 
-        # Reshape back to 4D spectogram shape: [Batch, Channels, Freq, Time]
+        #reshape back to 4D spectogram shape: [Batch, Channels, Freq, Time]
         recon_4d = recon_flat.view(B, F, T, C).permute(0, 3, 1, 2).contiguous()
 
         output = self.decoder(recon_4d)

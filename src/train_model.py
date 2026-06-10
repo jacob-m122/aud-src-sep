@@ -1,3 +1,4 @@
+"""train_model.py"""
 import os
 import torch
 import torch.nn as nn
@@ -56,7 +57,7 @@ def validate_and_evaluate(model, val_dataloader, criterion):
             reference_wav = reference_wav.to(device)
             clean_wav = clean_wav.to(device)
 
-            # Compute STFTs dynamically on the hardware accelerator
+
             complex_artifacted = processor.waveform_to_complex_stft(artifacted_wav)
             complex_reference = processor.waveform_to_complex_stft(reference_wav)
             complex_clean = processor.waveform_to_complex_stft(clean_wav)
@@ -73,7 +74,7 @@ def validate_and_evaluate(model, val_dataloader, criterion):
 
             recon_audio = processor.reconstruct_audio(complex_artifacted, predicted_mask)
             clean_audio = processor.reconstruct_audio(complex_artifacted, target_mask)
-            #dithering to prevent 
+            #dithering to prevent singular matrix error
             safe_recon = recon_audio + 1e-7 * torch.randn_like(recon_audio)
             safe_clean = clean_audio + 1e-7 * torch.randn_like(clean_audio)
             #calculate SIR/SDR
@@ -106,7 +107,7 @@ def train_loop(model, train_dataloader, val_dataloader, optimizer, criterion, ep
             reference_wav = reference_wav.to(device)
             clean_wav = clean_wav.to(device)
 
-            # Perform STFT math ON THE ACCELERATOR
+
             complex_artifacted = processor.waveform_to_complex_stft(artifacted_wav)
             complex_reference = processor.waveform_to_complex_stft(reference_wav)
             complex_clean = processor.waveform_to_complex_stft(clean_wav)
@@ -115,7 +116,7 @@ def train_loop(model, train_dataloader, val_dataloader, optimizer, criterion, ep
             mag_reference = torch.abs(complex_reference).unsqueeze(1)
             mag_clean = torch.abs(complex_clean).unsqueeze(1)
 
-            # Generate target mask
+
             target_mask = torch.clamp(mag_clean / (mag_artifacted + 1e-8), 0.0, 1.0)
 
             optimizer.zero_grad()

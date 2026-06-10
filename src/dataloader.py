@@ -1,3 +1,4 @@
+"""Dataloader.py"""
 import glob
 import torch
 import os
@@ -37,29 +38,29 @@ class MusdbDataset(Dataset):
         return pairs
     
     def _augment_waveform(self, primary_wav, reference_wav):
-        # 1. Stochastic Mic Bleed (5% to 40% gain)
+
         bleed_gain = torch.rand(1).item() * 0.35 + 0.05
-        # Randomly invert phase 50% of the time to prevent phase-memorization
+
         phase_flip = -1.0 if torch.rand(1).item() > 0.5 else 1.0
         bleed_signal = reference_wav * bleed_gain * phase_flip
 
-        # 2. Stochastic Room Reflections
-        # Delay: Random between 10ms (0.01s) and 1000ms (1.0s)
+
+
         delay_seconds = torch.rand(1).item() * 0.99 + 0.01
         delay_samples = int(self.processor.sample_rate * delay_seconds)
         
-        # Decay: Random between 10% and 60%
+
         decay_factor = torch.rand(1).item() * 0.5 + 0.1
         
         reflection = torch.zeros_like(primary_wav)
         if primary_wav.shape[-1] > delay_samples:
             reflection[:, delay_samples:] = primary_wav[:, :-delay_samples] * decay_factor
 
-        # 3. Stochastic Noise Floor (Varies from near-silent to noticeable analog hiss)
+
         noise_level = torch.rand(1).item() * 0.009 + 0.001
         noise_floor = torch.randn_like(primary_wav) * noise_level
 
-        # Combine
+
         artifacted_primary = primary_wav + bleed_signal + reflection + noise_floor
 
         return artifacted_primary
@@ -70,7 +71,6 @@ class MusdbDataset(Dataset):
     def __getitem__(self, id):
         pair = self.track_pairs[id]
 
-        #load raw waveforms
         clean_primary_wav = self.processor.wav_to_tensors(pair['primary_path'])
         reference_wav = self.processor.wav_to_tensors(pair['bleed_path'])
 
@@ -85,7 +85,7 @@ class MusdbDataset(Dataset):
             clean_primary_wav = torch.nn.functional.pad(clean_primary_wav[:, :min_len], (0, pad_amount))
             reference_wav = torch.nn.functional.pad(reference_wav[:, :min_len], (0, pad_amount))
         
-        # generate corrupted input
+
         artifacted_primary_wav = self._augment_waveform(clean_primary_wav, reference_wav)
 
         max_val = torch.max(torch.abs(artifacted_primary_wav))

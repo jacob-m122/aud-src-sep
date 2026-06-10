@@ -46,13 +46,13 @@ Validation SDR: 8.18 dB
 Validation SI-SDR: 4.16 dB
 Validation Mean LSD: 37.3269
 
-Reducing the batch size allowed the GPU to process 16kHz frequencies. While the synthetic SI-SDR metric appears lower due to the introduction of extreme stochastic augmentation, this model exhibited drastically superior qualitative strength when applied to naturally artifacted stems.
+Reducing the batch size allowed the GPU to process 16kHz frequencies. While the synthetic SI-SDR metric appears lower due to the introduction of extreme stochastic augmentation, the model exhibited drastically superior qualitative strength when applied to naturally artifacted stems.
 
 
 ## Visualizations
 Model predictions are visualized in `eval.ipynb`. This notebook processes four examples taken from a song of mine (located in `eval_data/`).
 
-Running the notebook generates side-by-side **Before & After Spectrograms** for each example. The visual comparisons clearly display the model masking out vertical transient bleed streaks. The notebook also exports the cleanly separated `.wav` files back into the `eval_data/` subdirectories for qualitative listening.
+Running the notebook generates side-by-side before & after Spectrograms for each example. The visual comparisons clearly display the model masking out vertical transient bleed streaks. The notebook also exports the cleanly separated `.wav` files back into the `eval_data/` subdirectories for qualitative listening.
 
 ## Limitations and Future Work
 1. **Memory Complexity:** The Cross-Track Attention matrix scales quadratically. Processing the full 22.05kHz Nyquist limit requires significant VRAM, so it us inveitably difficult to train without aggressive frequency capping or extreme gradient accumulation.
@@ -60,8 +60,8 @@ Running the notebook generates side-by-side **Before & After Spectrograms** for 
 
 ## Paths to Data and Weights
 **Data Paths:**
-Due to GitHub file size limits, the MUSDB18-HQ dataset is not hosted in this repository. 
-* **Local/Kaggle:** The data can be downloaded locally via the Kaggle API (`fakhrealam9537/musdb18-hq`) using 'download_data.py'.
+Due to GitHub file size limits, the MUSDB18-HQ dataset is not hosted in the main repository. 
+* **Local/Kaggle:** The data can be downloaded locally via the Kaggle API (`quanglvitlm/musdb18-hq`) using 'download_data.py'.
 
 * **Talapas Cluster:** If evaluating on the Talapas cluster, update the path variables at the top of `src/train_model.py` to point to the shared MUSDB directory:
 
